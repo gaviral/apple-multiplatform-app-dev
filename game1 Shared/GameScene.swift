@@ -13,7 +13,14 @@ class GameScene: SKScene {
     fileprivate var label : SKLabelNode?
     fileprivate var spinnyNode : SKShapeNode?
 
-    
+    #if os(iOS) || os(tvOS)
+    private var lastTouchPosition: CGPoint?
+    #endif
+
+    #if os(OSX)
+    private var lastMousePosition: CGPoint?
+    #endif
+
     class func newGameScene() -> GameScene {
         // Load 'GameScene.sks' as an SKScene.
         guard let scene = SKScene(fileNamed: "GameScene") as? GameScene else {
@@ -70,6 +77,10 @@ class GameScene: SKScene {
 extension GameScene {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if let touch = touches.first {
+            lastTouchPosition = touch.location(in: self)
+        }
+
         if let label = self.label {
             label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
         }
@@ -80,24 +91,38 @@ extension GameScene {
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first, let lastTouch = lastTouchPosition else {
+            return
+        }
+        let touchPosition = touch.location(in: self)
+        let movementDelta = CGPoint(x: touchPosition.x - lastTouch.x, y: touchPosition.y - lastTouch.y)
+
+        moveScene(by: movementDelta)
+        lastTouchPosition = touchPosition
         for t in touches {
             self.makeSpinny(at: t.location(in: self), color: SKColor.blue)
         }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        lastTouchPosition = nil
         for t in touches {
             self.makeSpinny(at: t.location(in: self), color: SKColor.red)
         }
     }
-    
+
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        lastTouchPosition = nil
         for t in touches {
             self.makeSpinny(at: t.location(in: self), color: SKColor.red)
         }
     }
-    
-   
+
+    private func moveScene(by delta: CGPoint) {
+        for node in children {
+            node.position = CGPoint(x: node.position.x + delta.x, y: node.position.y + delta.y)
+        }
+    }
 }
 #endif
 
@@ -106,18 +131,36 @@ extension GameScene {
 extension GameScene {
 
     override func mouseDown(with event: NSEvent) {
-        if let label = self.label {
+        lastMousePosition = event.location(in: self)
+
+        if let label = label {
             label.run(SKAction.init(named: "Pulse")!, withKey: "fadeInOut")
         }
         self.makeSpinny(at: event.location(in: self), color: SKColor.green)
     }
-    
+
     override func mouseDragged(with event: NSEvent) {
+        guard let lastMouse = lastMousePosition else {
+            return
+        }
+        let mousePosition = event.location(in: self)
+        let movementDelta = CGPoint(x: mousePosition.x - lastMouse.x, y: mousePosition.y - lastMouse.y)
+
+        moveScene(by: movementDelta)
+        lastMousePosition = mousePosition
+
         self.makeSpinny(at: event.location(in: self), color: SKColor.blue)
     }
-    
+
     override func mouseUp(with event: NSEvent) {
+        lastMousePosition = nil
         self.makeSpinny(at: event.location(in: self), color: SKColor.red)
+    }
+
+    private func moveScene(by delta: CGPoint) {
+        for node in children {
+            node.position = CGPoint(x: node.position.x + delta.x, y: node.position.y + delta.y)
+        }
     }
 
 }
