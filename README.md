@@ -18,7 +18,8 @@
 |                                  |                                | Build Settings             | Compiling and performance optimization settings                             |
 |                                  |                                | Package Dependencies       | External libraries and packages                                             |
 |                                  | ------------------------------ | -------------------------- | --------------------------------------------------------------------------- |
-|                                  | Targets                        | General                    | Basic setup like app icons and deployment target                            |
+|                                  | Targets                        |                            |                                                                             |
+|                                  |                                | General                    | Basic setup like app icons and deployment target                            |
 |                                  |                                | Signing & Capabilities     | Code signing and app capabilities                                           |
 |                                  |                                | Resource Tags              | Tags for resource optimization                                              |
 |                                  |                                | Info                       | Target-specific information                                                 |
